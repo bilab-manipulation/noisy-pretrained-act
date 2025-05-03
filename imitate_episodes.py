@@ -32,6 +32,8 @@ def main(args):
     batch_size_train = args['batch_size']
     batch_size_val = args['batch_size']
     num_epochs = args['num_epochs']
+    path2ckpt = args['path2ckpt']
+    noisy_img = args['noisy_img']
 
     # get task parameters
     is_sim = task_name[:4] == 'sim_'
@@ -42,6 +44,12 @@ def main(args):
         from aloha_scripts.constants import TASK_CONFIGS
         task_config = TASK_CONFIGS[task_name]
     dataset_dir = task_config['dataset_dir']
+    if noisy_img == 'True':
+        print('using noisy image')
+        dataset_dir += '_noisy_img'
+        ckpt_dir += '_noisy_img'
+    if path2ckpt == 'True':
+        ckpt_dir += '_finetune'
     num_episodes = task_config['num_episodes']
     episode_len = task_config['episode_len']
     camera_names = task_config['camera_names']
@@ -109,7 +117,10 @@ def main(args):
     with open(stats_path, 'wb') as f:
         pickle.dump(stats, f)
 
-    best_ckpt_info = train_bc(train_dataloader, val_dataloader, config)
+    if path2ckpt:
+        best_ckpt_info = train_bc(train_dataloader, val_dataloader, config, path2ckpt)
+    else:
+        best_ckpt_info = train_bc(train_dataloader, val_dataloader, config)
     best_epoch, min_val_loss, best_state_dict = best_ckpt_info
 
     # save best checkpoint
@@ -319,7 +330,7 @@ def forward_pass(data, policy):
     return policy(qpos_data, image_data, action_data, is_pad) # TODO remove None
 
 
-def train_bc(train_dataloader, val_dataloader, config):
+def train_bc(train_dataloader, val_dataloader, config, path2ckpt=False):
     num_epochs = config['num_epochs']
     ckpt_dir = config['ckpt_dir']
     seed = config['seed']
@@ -329,6 +340,12 @@ def train_bc(train_dataloader, val_dataloader, config):
     set_seed(seed)
 
     policy = make_policy(policy_class, policy_config)
+
+    if path2ckpt:
+        print(f'load checkpoint from {path2ckpt}for finetuning')
+        loading_status = policy.load_state_dict(torch.load(path2ckpt))
+        print(loading_status)
+
     policy.cuda()
     optimizer = make_optimizer(policy_class, policy)
 
@@ -392,8 +409,17 @@ def train_bc(train_dataloader, val_dataloader, config):
 
     # save training curves
     plot_history(train_history, validation_history, num_epochs, ckpt_dir, seed)
+    save_history(train_history, validation_history, num_epochs, ckpt_dir, seed)
 
     return best_ckpt_info
+
+def save_history(train_history, validation_history, num_epochs, ckpt_dir, seed):
+    with open(ckpt_dir + f'_train_history_seed_{seed}.pkl', 'wb') as f:
+        pickle.dump(train_history, f)
+    with open(ckpt_dir + f'_validation_history_seed_{seed}.pkl', 'wb') as f:
+        pickle.dump(validation_history, f)
+    with open(ckpt_dir + f'_num_epochs_seed_{seed}.pkl', 'wb') as f:
+        pickle.dump(num_epochs, f)
 
 
 def plot_history(train_history, validation_history, num_epochs, ckpt_dir, seed):
@@ -431,5 +457,8 @@ if __name__ == '__main__':
     parser.add_argument('--hidden_dim', action='store', type=int, help='hidden_dim', required=False)
     parser.add_argument('--dim_feedforward', action='store', type=int, help='dim_feedforward', required=False)
     parser.add_argument('--temporal_agg', action='store_true')
+
+    parser.add_argument('--path2ckpt', action='store', type=str, help='path to ckpt to load for finetuning', required=False)
+    parser.add_argument('--noisy_img', action='store', type=str, help='using noisy image', required=False)
     
     main(vars(parser.parse_args()))

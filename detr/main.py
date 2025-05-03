@@ -64,6 +64,10 @@ def get_args_parser():
     parser.add_argument('--chunk_size', action='store', type=int, help='chunk_size', required=False)
     parser.add_argument('--temporal_agg', action='store_true')
 
+    # for finetuning (path2ckpt, noisy_img)
+    parser.add_argument('--path2ckpt', action='store', type=str, help='path to ckpt to load for finetuning', required=False)
+    parser.add_argument('--noisy_img', action='store', type=str, help='using noisy image', required=False)
+
     return parser
 
 

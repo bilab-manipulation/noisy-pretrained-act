@@ -47,6 +47,12 @@ def make_ee_sim_env(task_name):
         task = InsertionEETask(random=False)
         env = control.Environment(physics, task, time_limit=20, control_timestep=DT,
                                   n_sub_steps=None, flat_observation=False)
+    elif 'sim_transfer_cube_noisy' in task_name:
+        xml_path = os.path.join(XML_DIR, f'bimanual_viperx_ee_transfer_cube.xml')
+        physics = mujoco.Physics.from_xml_path(xml_path)
+        task = TransferCubeEETask(random=False)
+        env = control.Environment(physics, task, time_limit=20, control_timestep=DT,
+                                  n_sub_steps=None, flat_observation=False)
     else:
         raise NotImplementedError
     return env
@@ -162,7 +168,7 @@ class TransferCubeEETask(BimanualViperXEETask):
         cube_pose = sample_box_pose()
         box_start_idx = physics.model.name2id('red_box_joint', 'joint')
         np.copyto(physics.data.qpos[box_start_idx : box_start_idx + 7], cube_pose)
-        # print(f"randomized cube position to {cube_position}")
+        print(f"randomized cube position to {cube_pose}")
 
         super().initialize_episode(physics)
 
@@ -188,12 +194,16 @@ class TransferCubeEETask(BimanualViperXEETask):
 
         reward = 0
         if touch_right_gripper:
+            print('touch_right_gripper')
             reward = 1
         if touch_right_gripper and not touch_table: # lifted
+            print('lifted')
             reward = 2
         if touch_left_gripper: # attempted transfer
+            print('attempted transfer')
             reward = 3
         if touch_left_gripper and not touch_table: # successful transfer
+            print('successful transfer')
             reward = 4
         return reward
 
@@ -213,12 +223,12 @@ class InsertionEETask(BimanualViperXEETask):
         peg_start_id = physics.model.name2id('red_peg_joint', 'joint')
         peg_start_idx = id2index(peg_start_id)
         np.copyto(physics.data.qpos[peg_start_idx : peg_start_idx + 7], peg_pose)
-        # print(f"randomized cube position to {cube_position}")
+        print(f"randomized peg position to {peg_pose}")
 
         socket_start_id = physics.model.name2id('blue_socket_joint', 'joint')
         socket_start_idx = id2index(socket_start_id)
         np.copyto(physics.data.qpos[socket_start_idx : socket_start_idx + 7], socket_pose)
-        # print(f"randomized cube position to {cube_position}")
+        print(f"randomized socket position to {socket_pose}")
 
         super().initialize_episode(physics)
 

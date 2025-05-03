@@ -1,3 +1,60 @@
+# Noisy-Pretrained Action Chunking with Transformers
+## Installation
+```
+# make virtual environment
+conda create -n npact python=3.11
+conda activate npact
+pip install -r requirements.txt
+
+# make submodule
+cd ./noisy-pretrained-act/detr && pip install -e .
+
+# generating own scripted data by using original record_sim_episodes.py are not good data because of pooly success rate.
+python record_sim_episodes.py --task_name sim_transfer_cube_scripted --dataset_dir ./data/sim_transfer_cube_scripted --num_episodes 50
+
+# so, download good data
+https://drive.google.com/drive/folders/1gPR03v05S1xiInoVJn7G7VJ9pDCnxq9O?usp=share_link
+
+# and generating noisy data
+## noising action only
+python record_sim_episodes.py --task_name sim_transfer_cube_noisy_scripted --num_episodes 50
+## noising image only
+python overwrite_img_with_noise.py --target_dataset_folder /sim_transfer_cube_human
+## noising both action and image
+python overwrite_img_with_noise.py --target_dataset_folder /sim_transfer_cube_noisy_scripted
+
+# check files
+## baseline data
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_human --episode_idx 0
+## nosing action data
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_noisy_scripted --episode_idx 0
+## noising image data
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_human_noisy_img --episode_idx 0
+## noising both data
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_noisy_scripted_noisy_img --episode_idx 0
+
+# pre-training & training
+## baseline 1: 사전학습 없음, ## baseline 2: 사전학습 없음, 사전학습 epoch만큼의 추가 학습
+python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 4000 --lr 1e-5 --seed 0
+## [노이즈 행동 + 이미지] 사전학습
+python imitate_episodes.py --task_name sim_transfer_cube_noisy_scripted --ckpt_dir ./ckpt/sim_transfer_cube_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0
+python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_1 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_transfer_cube_noisy_scripted/policy_last.ckpt
+## [노이즈 행동 + 노이즈 이미지] 사전학습
+python imitate_episodes.py --task_name sim_transfer_cube_noisy_scripted --ckpt_dir ./ckpt/sim_transfer_cube_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --noisy_img True
+python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_2 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_transfer_cube_noisy_scripted_noisy_img/policy_last.ckpt
+## [정상 행동 + 노이즈 이미지] 사전 학습
+python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --noisy_img True
+python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_3 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_transfer_cube_human_noisy_img/policy_last.ckpt
+
+# evaluation
+python3 imitate_episodes.py --task_name sim_noise_transfer_cube_scripted --ckpt_dir ./ckpt/sim_noise_transfer_cube_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0
+
+
+```
+
+
+
+
 # ACT: Action Chunking with Transformers
 
 ### *New*: [ACT tuning tips](https://docs.google.com/document/d/1FVIZfoALXg_ZkYKaYVh-qOlaXveq5CtvJHXkY25eYhs/edit?usp=sharing)

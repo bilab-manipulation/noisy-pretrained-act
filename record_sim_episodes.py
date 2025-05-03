@@ -1,3 +1,17 @@
+"""
+Snippets
+
+# if overwrite_action_with_noise == 'True':
+    # action = np.random.uniform(-0.03, 0.03, size=16)
+
+# if overwrite_action_with_noise == 'True':
+    # data_dict['/observations/qpos'].append(np.random.uniform(-1, 1, size=qpos.shape).astype(qpos.dtype))
+    # data_dict['/observations/qvel'].append(qvel)
+    # data_dict['/action'].append(np.random.uniform(-1, 1, size=action.shape).astype(action.dtype))
+            
+"""
+
+
 import time
 import os
 import numpy as np
@@ -8,7 +22,7 @@ import h5py
 from constants import PUPPET_GRIPPER_POSITION_NORMALIZE_FN, SIM_TASK_CONFIGS
 from ee_sim_env import make_ee_sim_env
 from sim_env import make_sim_env, BOX_POSE
-from scripted_policy import PickAndTransferPolicy, InsertionPolicy
+from scripted_policy import PickAndTransferPolicy, InsertionPolicy, PickAndTransferNoisyPolicy
 
 import IPython
 e = IPython.embed
@@ -24,11 +38,12 @@ def main(args):
     """
 
     task_name = args['task_name']
-    dataset_dir = args['dataset_dir']
     num_episodes = args['num_episodes']
     onscreen_render = args['onscreen_render']
     inject_noise = False
     render_cam_name = 'angle'
+
+    dataset_dir = SIM_TASK_CONFIGS[task_name]['dataset_dir']
 
     if not os.path.isdir(dataset_dir):
         os.makedirs(dataset_dir, exist_ok=True)
@@ -39,6 +54,8 @@ def main(args):
         policy_cls = PickAndTransferPolicy
     elif task_name == 'sim_insertion_scripted':
         policy_cls = InsertionPolicy
+    elif task_name == 'sim_transfer_cube_noisy_scripted':
+        policy_cls = PickAndTransferNoisyPolicy
     else:
         raise NotImplementedError
 
@@ -181,9 +198,8 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_name', action='store', type=str, help='task_name', required=True)
-    parser.add_argument('--dataset_dir', action='store', type=str, help='dataset saving dir', required=True)
     parser.add_argument('--num_episodes', action='store', type=int, help='num_episodes', required=False)
     parser.add_argument('--onscreen_render', action='store_true')
-    
+
     main(vars(parser.parse_args()))
 
