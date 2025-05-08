@@ -1,3 +1,6 @@
+# virtualkss
+ckpt/
+
 bin
 logs
 wandb
