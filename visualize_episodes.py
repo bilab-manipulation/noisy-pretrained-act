@@ -30,15 +30,33 @@ def load_hdf5(dataset_dir, dataset_name):
 
     return qpos, qvel, action, image_dict
 
-def main(args):
-    dataset_dir = args['dataset_dir']
-    episode_idx = args['episode_idx']
-    dataset_name = f'episode_{episode_idx}'
+def count_hdf5_files(folder_path):
+    hdf5_extensions = ('.hdf5', '.h5')
+    count = sum(1 for f in os.listdir(folder_path) if f.endswith(hdf5_extensions))
+    return count
 
+def process(dataset_dir, episode_idx):
+    dataset_name = f'episode_{episode_idx}'
+    print(f'process {dataset_dir + dataset_name}')
+    
     qpos, qvel, action, image_dict = load_hdf5(dataset_dir, dataset_name)
     save_videos(image_dict, DT, video_path=os.path.join(dataset_dir, dataset_name + '_video.mp4'))
     visualize_joints(qpos, action, plot_path=os.path.join(dataset_dir, dataset_name + '_qpos.png'))
     # visualize_timestamp(t_list, dataset_path) # TODO addn timestamp back
+
+def main(args):
+    dataset_dir = args['dataset_dir']
+    if args['episode_idx'] == 'all':
+        print(f"Visualize all episodes in {dataset_dir}")
+        num_files = count_hdf5_files(dataset_dir)
+        print(f"HDF5 파일 개수: {num_files}")
+        for episode_idx in range(num_files):
+            process(dataset_dir, episode_idx)
+    else:
+        episode_idx = int(args['episode_idx'])
+        process(dataset_dir, episode_idx)
+
+
 
 
 def save_videos(video, dt, video_path=None):
@@ -143,5 +161,5 @@ def visualize_timestamp(t_list, dataset_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_dir', action='store', type=str, help='Dataset dir.', required=True)
-    parser.add_argument('--episode_idx', action='store', type=int, help='Episode index.', required=False)
+    parser.add_argument('--episode_idx', action='store', type=str, help='Episode index.', required=False)
     main(vars(parser.parse_args()))

@@ -22,7 +22,7 @@ import h5py
 from constants import PUPPET_GRIPPER_POSITION_NORMALIZE_FN, SIM_TASK_CONFIGS
 from ee_sim_env import make_ee_sim_env
 from sim_env import make_sim_env, BOX_POSE
-from scripted_policy import PickAndTransferPolicy, InsertionPolicy, PickAndTransferNoisyPolicy
+from scripted_policy import PickAndTransferPolicy, InsertionPolicy, PickAndTransferNoisyPolicy, InsertionNoisyPolicy
 
 import IPython
 e = IPython.embed
@@ -56,6 +56,8 @@ def main(args):
         policy_cls = InsertionPolicy
     elif task_name == 'sim_transfer_cube_noisy_scripted':
         policy_cls = PickAndTransferNoisyPolicy
+    elif task_name == 'sim_insertion_noisy_scripted':
+        policy_cls = InsertionNoisyPolicy
     else:
         raise NotImplementedError
 

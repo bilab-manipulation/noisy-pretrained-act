@@ -42,7 +42,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--target_dataset_folder', action='store', type=str, help='target dataset folder', required=True)
 args = parser.parse_args()
 
-src = DATA_DIR + args['target_dataset_folder']
+src = DATA_DIR + args.target_dataset_folder
 dst = src + '_noisy_img'
+
+print('copy folder')
 copy_folder(src, dst)
+print('add noise to images in hdf5')
 add_noise_to_images_in_hdf5(dst)

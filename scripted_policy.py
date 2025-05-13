@@ -157,6 +157,15 @@ class InsertionPolicy(BasePolicy):
 
         ]
 
+class InsertionNoisyPolicy(InsertionPolicy):
+    def generate_trajectory(self, ts_first):
+        init_mocap_pose_right = ts_first.observation['mocap_pose_right']
+        init_mocap_pose_left = ts_first.observation['mocap_pose_left']
+
+        self.left_trajectory = [{"t": 0, "xyz": init_mocap_pose_left[:3], "quat": init_mocap_pose_left[3:], "gripper": 0}]
+        self.left_trajectory.extend([{"t": 10 * i, "xyz": np.array([np.random.uniform(-0.25, 0.25), np.random.uniform(0.25, 0.75), np.random.uniform(0, 0.5)]), "quat": Quaternion.random().elements, "gripper": np.random.uniform(0,1)} for i in range(1, 41)])
+        self.right_trajectory = [{"t": 0, "xyz": init_mocap_pose_right[:3], "quat": init_mocap_pose_right[3:], "gripper": 0}]
+        self.right_trajectory.extend([{"t": 10 * i, "xyz": np.array([np.random.uniform(-0.25, 0.25), np.random.uniform(0.25, 0.75), np.random.uniform(0, 0.5)]), "quat": Quaternion.random().elements, "gripper": np.random.uniform(0,1)} for i in range(1, 41)])
 
 def test_policy(task_name):
     # example rolling out pick_and_transfer policy

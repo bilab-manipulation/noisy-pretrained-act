@@ -18,35 +18,54 @@ https://drive.google.com/drive/folders/1gPR03v05S1xiInoVJn7G7VJ9pDCnxq9O?usp=sha
 # and generating noisy data
 ## noising action only
 python record_sim_episodes.py --task_name sim_transfer_cube_noisy_scripted --num_episodes 50
+python record_sim_episodes.py --task_name sim_insertion_noisy_scripted --num_episodes 50
 ## noising image only
 python overwrite_img_with_noise.py --target_dataset_folder /sim_transfer_cube_human
+python overwrite_img_with_noise.py --target_dataset_folder /sim_insertion_human
 ## noising both action and image
 python overwrite_img_with_noise.py --target_dataset_folder /sim_transfer_cube_noisy_scripted
+python overwrite_img_with_noise.py --target_dataset_folder /sim_insertion_noisy_scripted
 
 # check files
 ## baseline data
-python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_human --episode_idx 0
-## nosing action data
-python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_noisy_scripted --episode_idx 0
-## noising image data
-python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_human_noisy_img --episode_idx 0
-## noising both data
-python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_transfer_cube_noisy_scripted_noisy_img --episode_idx 0
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_insertion_human --episode_idx all
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_insertion_human_noisy_img --episode_idx all
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_insertion_noisy_scripted --episode_idx all
+python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pretrained-act/sim_insertion_noisy_scripted_noisy_img --episode_idx all
 
 # pre-training & training
-## baseline 1: 사전학습 없음
+## transfer cube
+### baseline 1: 사전학습 없음
 python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0
-## [노이즈 행동 + 이미지] 사전학습
+### [노이즈 행동 + 이미지] 사전학습
 python imitate_episodes.py --task_name sim_transfer_cube_noisy_scripted --ckpt_dir ./ckpt/sim_transfer_cube_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0
 python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_1 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_transfer_cube_noisy_scripted/policy_last.ckpt
-## [노이즈 행동 + 노이즈 이미지] 사전학습
+### [노이즈 행동 + 노이즈 이미지] 사전학습
 python imitate_episodes.py --task_name sim_transfer_cube_noisy_scripted --ckpt_dir ./ckpt/sim_transfer_cube_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --noisy_img True
 python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_2 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_transfer_cube_noisy_scripted_noisy_img/policy_last.ckpt
-## [정상 행동 + 노이즈 이미지] 사전 학습
+### [정상 행동 + 노이즈 이미지] 사전 학습
 python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --noisy_img True
 python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_3 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_transfer_cube_human_noisy_img/policy_last.ckpt
-## baseline 2: 사전학습 없음, 사전학습 epoch만큼의 추가 학습
+### baseline 2: 사전학습 없음, 사전학습 epoch만큼의 추가 학습
 python imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_4 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 4000 --lr 1e-5 --seed 0
+
+## insertion
+### baseline 1: 사전학습 없음, baseline 2: 사전학습 없음, 사전학습 epoch만큼의 추가 학습
+python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0
+### [노이즈 행동 + 이미지] 사전학습
+python imitate_episodes.py --task_name sim_insertion_noisy_scripted --ckpt_dir ./ckpt/sim_insertion_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0
+python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_1 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_insertion_noisy_scripted/policy_last.ckpt
+### [노이즈 행동 + 노이즈 이미지] 사전학습
+python imitate_episodes.py --task_name sim_insertion_noisy_scripted --ckpt_dir ./ckpt/sim_insertion_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0 --noisy_img True
+python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_2 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_insertion_noisy_scripted_noisy_img/policy_last.ckpt
+### [정상 행동 + 노이즈 이미지] 사전 학습
+python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0 --noisy_img True
+python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_3 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_insertion_human_noisy_img/policy_last.ckpt
+
+## example of training command in bi-stealth server
+CUDA_VISIBLE_DEVICES=0 python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0 && CUDA_VISIBLE_DEVICES=0 python imitate_episodes.py --task_name sim_insertion_noisy_scripted --ckpt_dir ./ckpt/sim_insertion_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0 && CUDA_VISIBLE_DEVICES=0 python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_1 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_insertion_noisy_scripted/policy_last.ckpt
+
+CUDA_VISIBLE_DEVICES=1 python imitate_episodes.py --task_name sim_insertion_noisy_scripted --ckpt_dir ./ckpt/sim_insertion_noisy_scripted --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0 --noisy_img True && CUDA_VISIBLE_DEVICES=1 python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_2 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_insertion_noisy_scripted_noisy_img/policy_last.ckpt && CUDA_VISIBLE_DEVICES=1 python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0 --noisy_img True && CUDA_VISIBLE_DEVICES=1 python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_3 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0 --path2ckpt ./ckpt/sim_insertion_human_noisy_img/policy_last.ckpt
 
 # evaluation
 python3 imitate_episodes.py --task_name sim_transfer_cube_human --ckpt_dir ./ckpt/sim_transfer_cube_human_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 2000 --lr 1e-5 --seed 0 --eval
