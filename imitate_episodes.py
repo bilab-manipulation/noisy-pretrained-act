@@ -97,8 +97,18 @@ def main(args):
     }
 
     if is_eval:
-        ckpt_names = [f'policy_best.ckpt' 
-                      #f'policy_epoch_19500_seed_0.ckpt.ckpt'
+        ckpt_names = [#f'policy_best.ckpt' 
+                      f'policy_epoch_9500_seed_0.ckpt'
+                      
+                      #f'policy_epoch_500_seed_0.ckpt'
+                      #f'policy_epoch_2500_seed_0.ckpt'
+                      #f'policy_epoch_5000_seed_0.ckpt'
+                      #f'policy_epoch_7500_seed_0.ckpt'
+                      #f'policy_epoch_10000_seed_0.ckpt'
+                      #f'policy_epoch_12500_seed_0.ckpt'
+                      #f'policy_epoch_15000_seed_0.ckpt'
+                      #f'policy_epoch_17500_seed_0.ckpt'
+                      #f'policy_epoch_19500_seed_0.ckpt'
                       ]
         results = []
         for ckpt_name in ckpt_names:
