@@ -6,8 +6,14 @@
 - success rate
 - torch version for TITAN Xp
 - wandb
+- os mesa
+
 
 ```
+# prerequisites
+sudo apt install -y libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev mesa-utils
+export MUJOCO_GL=egl
+
 # virtual env settings
 conda create -n np4a python=3.11
 conda activate np4a
