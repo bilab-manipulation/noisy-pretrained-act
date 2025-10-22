@@ -21,6 +21,8 @@ from sim_env import BOX_POSE
 import IPython
 e = IPython.embed
 
+import wandb
+
 def main(args):
     set_seed(1)
     # command line parameters
@@ -96,6 +98,9 @@ def main(args):
         'real_robot': not is_sim
     }
 
+    wandb.init(project='np4a', reinit=True, entity='virtualkss-team', name=task_name)
+    wandb.config.update(config)
+
     if is_eval:
         ckpt_names = [#f'policy_best.ckpt' 
                       f'policy_epoch_9500_seed_0.ckpt'
@@ -140,6 +145,7 @@ def main(args):
     torch.save(best_state_dict, ckpt_path)
     print(f'Best ckpt, val loss {min_val_loss:.6f} @ epoch{best_epoch}')
 
+    wandb.finish()
 
 def make_policy(policy_class, policy_config):
     if policy_class == 'ACT':
@@ -218,7 +224,7 @@ def eval_bc(config, ckpt_name, save_episode=True):
 
     max_timesteps = int(max_timesteps * 1) # may increase for real-world tasks
 
-    num_rollouts = 50
+    num_rollouts = 10
     episode_returns = []
     highest_rewards = []
     for rollout_id in range(num_rollouts):
@@ -381,6 +387,10 @@ def train_bc(train_dataloader, val_dataloader, config, path2ckpt=False):
             if epoch_val_loss < min_val_loss:
                 min_val_loss = epoch_val_loss
                 best_ckpt_info = (epoch, min_val_loss, deepcopy(policy.state_dict()))
+        wandb.log({
+            'epoch_val_loss': epoch_val_loss,
+            'min_val_loss': min_val_loss
+            }, step=epoch)
         print(f'Val loss:   {epoch_val_loss:.5f}')
         summary_string = ''
         for k, v in epoch_summary.items():
@@ -398,6 +408,9 @@ def train_bc(train_dataloader, val_dataloader, config, path2ckpt=False):
             optimizer.step()
             optimizer.zero_grad()
             train_history.append(detach_dict(forward_dict))
+            
+            wandb.log(forward_dict, step=epoch)
+        
         epoch_summary = compute_dict_mean(train_history[(batch_idx+1)*epoch:(batch_idx+1)*(epoch+1)])
         epoch_train_loss = epoch_summary['loss']
         print(f'Train loss: {epoch_train_loss:.5f}')
@@ -406,10 +419,16 @@ def train_bc(train_dataloader, val_dataloader, config, path2ckpt=False):
             summary_string += f'{k}: {v.item():.3f} '
         print(summary_string)
 
-        if epoch % 500 == 0:
+        if epoch % 100 == 0:
             ckpt_path = os.path.join(ckpt_dir, f'policy_epoch_{epoch}_seed_{seed}.ckpt')
             torch.save(policy.state_dict(), ckpt_path)
             plot_history(train_history, validation_history, epoch, ckpt_dir, seed)
+
+            success, avg_return = eval_bc(config, f'policy_epoch_{epoch}_seed_{seed}.ckpt', save_episode=True)
+            wandb.log({
+                'success': success,
+                'avg_return': avg_return
+                }, step=epoch)
 
     ckpt_path = os.path.join(ckpt_dir, f'policy_last.ckpt')
     torch.save(policy.state_dict(), ckpt_path)
