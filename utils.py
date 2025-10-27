@@ -184,6 +184,24 @@ def detach_dict(d):
         new_d[k] = v.detach()
     return new_d
 
-def set_seed(seed):
+def set_seed(seed, deterministic=True):
     torch.manual_seed(seed)
     np.random.seed(seed)
+
+    # import random as _random
+    # import numpy as _np
+    # import torch as _torch
+
+    # _random.seed(seed)
+    # _np.random.seed(seed)
+    # _torch.manual_seed(seed)
+    # if _torch.cuda.is_available():
+    #     _torch.cuda.manual_seed_all(seed)
+
+    # if deterministic:
+    #     _torch.backends.cudnn.deterministic = True
+    #     _torch.backends.cudnn.benchmark = False
+    #     try:
+    #         _torch.use_deterministic_algorithms(True)
+    #     except Exception:
+    #         pass

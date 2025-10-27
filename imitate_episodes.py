@@ -224,7 +224,7 @@ def eval_bc(config, ckpt_name, save_episode=True):
 
     max_timesteps = int(max_timesteps * 1) # may increase for real-world tasks
 
-    num_rollouts = 10
+    num_rollouts = 20
     episode_returns = []
     highest_rewards = []
     for rollout_id in range(num_rollouts):
@@ -424,7 +424,7 @@ def train_bc(train_dataloader, val_dataloader, config, path2ckpt=False):
             torch.save(policy.state_dict(), ckpt_path)
             plot_history(train_history, validation_history, epoch, ckpt_dir, seed)
 
-            success, avg_return = eval_bc(config, f'policy_epoch_{epoch}_seed_{seed}.ckpt', save_episode=True)
+            success, avg_return = eval_bc(config, f'policy_epoch_{epoch}_seed_{seed}.ckpt', save_episode=False)
             wandb.log({
                 'success': success,
                 'avg_return': avg_return

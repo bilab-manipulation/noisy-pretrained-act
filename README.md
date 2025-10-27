@@ -8,10 +8,11 @@
 - wandb
 - os mesa
 
+- seed: mean
 
 ```
 # prerequisites
-sudo apt install -y libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev mesa-utils
+#sudo apt install -y libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev mesa-utils
 export MUJOCO_GL=egl
 
 # virtual env settings
@@ -44,6 +45,14 @@ python visualize_episodes.py --dataset_dir /media/bi_admin/4tb_hdd/data/noisy-pr
 
 # find loss plateau
 CUDA_VISIBLE_DEVICES=0 python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 20000 --lr 1e-5 --seed 0
+
+CUDA_VISIBLE_DEVICES=1 python imitate_episodes.py --task_name sim_transfer_cube_scripted --ckpt_dir ./ckpt/sim_transfer_cube_scripted_0_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0
+CUDA_VISIBLE_DEVICES=2 python imitate_episodes.py --task_name sim_transfer_cube_scripted --ckpt_dir ./ckpt/sim_transfer_cube_scripted_0_1 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0
+CUDA_VISIBLE_DEVICES=3 python imitate_episodes.py --task_name sim_insertion_scripted --ckpt_dir ./ckpt/sim_insertion_scripted_0_0 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0
+CUDA_VISIBLE_DEVICES=4 python imitate_episodes.py --task_name sim_insertion_scripted --ckpt_dir ./ckpt/sim_insertion_scripted_0_1 --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 10000 --lr 1e-5 --seed 0
+
+CUDA_VISIBLE_DEVICES=3 python imitate_episodes.py --task_name sim_insertion_human --ckpt_dir ./ckpt/sim_insertion_human_long --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 100000 --lr 1e-5 --seed 0
+CUDA_VISIBLE_DEVICES=4 python imitate_episodes.py --task_name sim_insertion_scripted --ckpt_dir ./ckpt/sim_insertion_scripted_long --policy_class ACT --kl_weight 10 --chunk_size 100 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 --num_epochs 100000 --lr 1e-5 --seed 0
 
 # pre-training & training
 ## insertion
