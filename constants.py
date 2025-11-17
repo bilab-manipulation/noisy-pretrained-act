@@ -1,7 +1,7 @@
 import pathlib
 
 ### Task parameters
-DATA_DIR = '/home/ksshin/data/public_act_sim'
+DATA_DIR = '/media/bi_admin/4tb_hdd/data/noisy-pretrained-act'
 SIM_TASK_CONFIGS = {
     'sim_transfer_cube_scripted':{
         'dataset_dir': DATA_DIR + '/sim_transfer_cube_scripted',
