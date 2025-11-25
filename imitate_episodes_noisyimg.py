@@ -98,7 +98,7 @@ def main(args):
         'real_robot': not is_sim
     }
 
-    wandb.init(project='np4a', reinit=True, entity='virtualkss-team', name=task_name)
+    wandb.init(project='np4a_noisyimg_', reinit=True, entity='virtualkss-team', name=task_name)
     wandb.config.update(config)
 
     if is_eval:
@@ -215,7 +215,7 @@ def eval_bc(config, ckpt_name, save_episode=True):
 
     max_timesteps = int(max_timesteps * 1) # may increase for real-world tasks
 
-    num_rollouts = 20
+    num_rollouts = 50
     episode_returns = []
     highest_rewards = []
     for rollout_id in range(num_rollouts):

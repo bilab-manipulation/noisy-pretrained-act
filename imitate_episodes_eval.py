@@ -98,17 +98,17 @@ def main(args):
         'real_robot': not is_sim
     }
 
-    wandb.init(project='np4a', reinit=True, entity='virtualkss-team', name=task_name)
+    wandb.init(project='np4a_eval', reinit=True, entity='virtualkss-team', name=task_name)
     wandb.config.update(config)
 
     if is_eval:
         ckpt_names = [
-            f'policy_best.ckpt' 
+            f'policy_last.ckpt' 
             #f'policy_epoch_9500_seed_0.ckpt'
                       ]
         results = []
         for ckpt_name in ckpt_names:
-            success_rate, avg_return = eval_bc(config, ckpt_name, save_episode=True)
+            success_rate, avg_return = eval_bc(config, ckpt_name, save_episode=False)
             results.append([ckpt_name, success_rate, avg_return])
 
         for ckpt_name, success_rate, avg_return in results:
@@ -215,7 +215,7 @@ def eval_bc(config, ckpt_name, save_episode=True):
 
     max_timesteps = int(max_timesteps * 1) # may increase for real-world tasks
 
-    num_rollouts = 20
+    num_rollouts = 50
     episode_returns = []
     highest_rewards = []
     for rollout_id in range(num_rollouts):
@@ -323,7 +323,7 @@ def eval_bc(config, ckpt_name, save_episode=True):
     print(summary_str)
 
     # save success rate to txt
-    result_file_name = 'result_' + ckpt_name.split('.')[0] + '.txt'
+    result_file_name = 'eval_result_' + ckpt_name.split('.')[0] + '.txt'
     with open(os.path.join(ckpt_dir, result_file_name), 'w') as f:
         f.write(summary_str)
         f.write(repr(episode_returns))
