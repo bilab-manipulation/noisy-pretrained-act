@@ -1,4 +1,16 @@
 # Improving Robot Imitation Learning with Noise-Pretrained Transformers
+## 2025.11.25. memo for KTCP
+- KCC 제출 버전의 ckpt에 대한 분석 추가(bi-stealth 4tb hdd의 data/archive에서 찾음)
+- 당시 코드는 github 250513_overflow 커밋 또는 그 이전임(5월7일 제출)
+- 기존 성능은 npact_eval 파일의 시트 1: https://docs.google.com/spreadsheets/d/1JjnU7BWnV-4ooRz0hF8CGxt8fmEbikqOVXssfeUUrpA/edit?gid=283176072#gid=283176072
+
+- 0: baseline, 1: noisy act, 2: noisy act + img, 3: noisy img
+- policy last (epoch idx 1999)로 다시 evaluation: KCC버전은 policy best 기준인듯
+- 분석에 사용된 ckpt는 4.7GB정도, 전체는 몇백기가 나와서 data NAS에 보관(폴더명 KCC_KTCP)
+- baseline2, insertion 등은 epoch idx가 1999가 아니라 2000이 저장되어있어서 논문에 포함하지 않았음
+
+- TODO: 학습 평균, 최종 학습 성능, various noise distribution or magnitude, 학습 전 가중치(현재는 1 epoch 후에 가중치 저장) 저장 및 비교, seed control, 훈련 시간 비교
+
 ## 2025.10.20. New version: Noisy-Pretraining for Action; NP4A
 - ACT -> ACT++ : TODO
 - transfer cube task -> insertion task : reward settings of transfer cube task is quite strange and - insertion task is more cleary criterion of task success.
